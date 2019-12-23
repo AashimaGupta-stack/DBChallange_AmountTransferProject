@@ -18,7 +18,7 @@ public interface AccountsRepository {
   
   void addAmount(String accountId, BigDecimal amount) throws BankTransactionException;
   
-  void transferBetween(String accountFrom, String accountTo,BigDecimal amount) throws BankTransactionException;
+  void transferBetween(String accountFrom, String accountTo,BigDecimal amount) throws DuplicateAccountIdException;
 
   
 }

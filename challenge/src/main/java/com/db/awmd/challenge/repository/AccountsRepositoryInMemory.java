@@ -4,8 +4,9 @@ import com.db.awmd.challenge.domain.Account;
 import com.db.awmd.challenge.exception.BankTransactionException;
 import com.db.awmd.challenge.exception.DuplicateAccountIdException;
 
-
+import static org.junit.Assert.assertArrayEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
@@ -13,6 +14,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import org.junit.Assert;
 import org.springframework.stereotype.Repository;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
@@ -42,31 +45,46 @@ public class AccountsRepositoryInMemory implements AccountsRepository {
 
 
   @Override
-  public void addAmount(String accountId, BigDecimal amount) throws BankTransactionException {
+  public void addAmount(String accountId, BigDecimal amount) throws DuplicateAccountIdException {
 	// TODO Auto-generated method stub
 	Account account= this.getAccount(accountId);
 	BigDecimal newBalance;
 	if(account == null)
-		throw new BankTransactionException("Account not found " + accountId);
+		throw new DuplicateAccountIdException("Account not found " + accountId);
 	
-	if((amount.compareTo(account.getBalance()) == 1)) {
-		throw new BankTransactionException("Insuffcient balance");
-	}
-	else if(amount.signum()== -1) {
-		throw new BankTransactionException("Overdrafts not allowed");
-	}
-	else {
+		else {
 		newBalance = amount.add(account.getBalance());
 	}
 	account.setBalance(newBalance);
 	
   }
+  
+  public void subAmount(String accounId, BigDecimal amount) throws DuplicateAccountIdException {
+	  Account account= this.getAccount(accounId);
+		BigDecimal newBalance= new BigDecimal(0);
+		if(account == null)
+			throw new DuplicateAccountIdException("Account not found " + accounId);
+		
+		else if((amount.compareTo(account.getBalance()) == 1)) {
+			throw new DuplicateAccountIdException("Insuffcient balance");
+		}
+		else if(amount.signum()== -1) {
+			throw new DuplicateAccountIdException("Negative amount not allowed");
+			
+		}
+		else {
+			newBalance = amount.subtract(account.getBalance());
+		}
+		account.setBalance(newBalance); 
+  }
 
   @Override
-  public void transferBetween(String accountFrom, String accountTo, BigDecimal amount) throws BankTransactionException {
+  public void transferBetween(String accountFrom, String accountTo, BigDecimal amount) throws DuplicateAccountIdException {
 	// TODO Auto-generated method stub
-	addAmount(accountFrom, amount.negate());
-	addAmount(accountTo, amount);
+	 
+		    subAmount(accountFrom, amount);
+			addAmount(accountTo, amount);
+	  
   }
 
 
