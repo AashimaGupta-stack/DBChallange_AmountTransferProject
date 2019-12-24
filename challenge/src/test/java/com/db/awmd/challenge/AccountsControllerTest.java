@@ -1,7 +1,7 @@
 package com.db.awmd.challenge;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.when;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -107,40 +107,46 @@ public class AccountsControllerTest {
   @Test
   public void transferAmountGreaterThanBalance() throws Exception{
 	
-	   this.mockMvc.perform(post("/v1/accounts").contentType(MediaType.APPLICATION_JSON)
+	    this.mockMvc.perform(post("/v1/accounts").contentType(MediaType.APPLICATION_JSON)
 	    	      .content("{\"accountId\":\"Id-123\",\"balance\":1000}")).andExpect(status().isCreated());
 	    
 	    this.mockMvc.perform(post("/v1/accounts").contentType(MediaType.APPLICATION_JSON)
 	    	      .content("{\"accountId\":\"Id-124\",\"balance\":1000}")).andExpect(status().isCreated());
-	   
-	  
-	   //this.accountsService.transferBetween(accountFrom,accountTo, amount);
-	  
-	    this.mockMvc.perform(post("/v1/accounts/transferAmount").contentType(MediaType.APPLICATION_JSON)
+	 
+	  	this.mockMvc.perform(post("/v1/accounts/transferAmount").contentType(MediaType.APPLICATION_JSON)
 			  									.param("accountFrom", "Id-123")
 			  									  .param("accountTo", "Id-124")
-			  									  .param("amount", "1100")).andExpect(status().isBadRequest());
+			  									  .param("amount", "1100")).andExpect(status().isBadRequest()); 
+  }
+  
+  @Test
+  public void transferAmountNegative() throws Exception{
+	
+	    this.mockMvc.perform(post("/v1/accounts").contentType(MediaType.APPLICATION_JSON)
+	    	      .content("{\"accountId\":\"Id-123\",\"balance\":1000}")).andExpect(status().isCreated());
+	    
+	    this.mockMvc.perform(post("/v1/accounts").contentType(MediaType.APPLICATION_JSON)
+	    	      .content("{\"accountId\":\"Id-124\",\"balance\":1000}")).andExpect(status().isCreated());
+	 
+	  	this.mockMvc.perform(post("/v1/accounts/transferAmount").contentType(MediaType.APPLICATION_JSON)
+			  									.param("accountFrom", "Id-123")
+			  									  .param("accountTo", "Id-124")
+			  									  .param("amount", "-100")).andExpect(status().isBadRequest());
 	  	 	  
 	   }
   
   @Test
   public void betweenAccounts() throws Exception{
-	   /* String accountFrom = "Id-123" ;
-	    String accountTo = "Id-124";  */
 	  
 	    this.mockMvc.perform(post("/v1/accounts").contentType(MediaType.APPLICATION_JSON)
 	    	      .content("{\"accountId\":\"Id-123\",\"balance\":1000}")).andExpect(status().isCreated());
 	    
 	    this.mockMvc.perform(post("/v1/accounts").contentType(MediaType.APPLICATION_JSON)
 	    	      .content("{\"accountId\":\"Id-124\",\"balance\":1000}")).andExpect(status().isCreated());
-	    
 	  
-	 //this.accountsService.transferBetween(accountFrom,accountTo, new BigDecimal("100"));
-	  
-	  this.mockMvc.perform(post("/v1/accounts/transferAmount")
+	    this.mockMvc.perform(post("/v1/accounts/transferAmount").contentType(MediaType.APPLICATION_JSON)
 			  									.param("accountFrom", "Id-123")
 			  									  .param("accountTo", "Id-124")
-			  									  .param("amount", "100")).andExpect(status().isOk());
-	  
+			  									  .param("amount", "100")).andExpect(status().isOk());  
   }
 }

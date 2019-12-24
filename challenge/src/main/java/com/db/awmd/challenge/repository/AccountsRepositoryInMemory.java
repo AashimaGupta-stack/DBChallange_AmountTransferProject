@@ -28,7 +28,7 @@ public class AccountsRepositoryInMemory implements AccountsRepository {
   public void createAccount(Account account) throws DuplicateAccountIdException {
     Account previousAccount = accounts.putIfAbsent(account.getAccountId(), account);
     if (previousAccount != null) {
-      throw new DuplicateAccountIdException(
+      throw new DuplicateAccountIdException (
         "Account id " + account.getAccountId() + " already exists!");
     }
   }
@@ -45,13 +45,15 @@ public class AccountsRepositoryInMemory implements AccountsRepository {
 
 
   @Override
-  public void addAmount(String accountId, BigDecimal amount) throws DuplicateAccountIdException {
+  public synchronized void addAmount(String accountId, BigDecimal amount) throws BankTransactionException {
 	// TODO Auto-generated method stub
 	Account account= this.getAccount(accountId);
 	BigDecimal newBalance;
 	if(account == null)
-		throw new DuplicateAccountIdException("Account not found " + accountId);
-	
+		throw new BankTransactionException("Account not found " + accountId);
+	else if(amount.signum()== -1) {
+		throw new BankTransactionException("Negative amount not allowed");	
+	}
 		else {
 		newBalance = amount.add(account.getBalance());
 	}
@@ -59,31 +61,26 @@ public class AccountsRepositoryInMemory implements AccountsRepository {
 	
   }
   
-  public void subAmount(String accounId, BigDecimal amount) throws DuplicateAccountIdException {
+  public synchronized void subAmount(String accounId, BigDecimal amount) throws BankTransactionException {
 	  Account account= this.getAccount(accounId);
 		BigDecimal newBalance= new BigDecimal(0);
 		if(account == null)
-			throw new DuplicateAccountIdException("Account not found " + accounId);
+			throw new BankTransactionException("Account not found " + accounId);
 		
 		else if((amount.compareTo(account.getBalance()) == 1)) {
-			throw new DuplicateAccountIdException("Insuffcient balance");
+			throw new BankTransactionException("Insuffcient balance");
 		}
-		else if(amount.signum()== -1) {
-			throw new DuplicateAccountIdException("Negative amount not allowed");
-			
-		}
+		
 		else {
-			newBalance = amount.subtract(account.getBalance());
+			newBalance = account.getBalance().subtract(amount);
 		}
 		account.setBalance(newBalance); 
   }
 
   @Override
-  public void transferBetween(String accountFrom, String accountTo, BigDecimal amount) throws DuplicateAccountIdException {
-	// TODO Auto-generated method stub
-	 
-		    subAmount(accountFrom, amount);
-			addAmount(accountTo, amount);
+  public synchronized void transferBetween(String accountFrom, String accountTo, BigDecimal amount) throws BankTransactionException {
+		subAmount(accountFrom, amount);
+		addAmount(accountTo, amount);
 	  
   }
 

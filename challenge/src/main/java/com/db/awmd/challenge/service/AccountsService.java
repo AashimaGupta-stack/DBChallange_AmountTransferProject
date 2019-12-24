@@ -30,7 +30,7 @@ public class AccountsService {
     return this.accountsRepository.getAccount(accountId);
   }
   
-  public void transferBetween(String account1, String account2, BigDecimal amount) {
+  public void transferBetween(String account1, String account2, BigDecimal amount) throws BankTransactionException {
 	   this.accountsRepository.transferBetween(account1, account2, amount);
   }
 }

@@ -63,18 +63,7 @@ public class AccountsController implements NotificationService {
     return this.accountsService.getAccount(accountId);
   }
   
- // If we create different model class for Account transfer
- /* @RequestMapping(value = "/transferAmount", method = RequestMethod.POST)
-  public void betweenAccounts(MoneyTransfer sendMoneyFrom) throws BankTransactionException {
-
-            accountsService.transferBetween(sendMoneyFrom.getFrom(), 
-    		  sendMoneyFrom.getTo(), 
-    		  sendMoneyFrom.getAmount());
-      
-  }*/
-  
-  // Passing the parameters within body
-  
+ 
   @RequestMapping(value = "/transferAmount")
   public ResponseEntity<Object> betweenAccounts(@RequestParam(value="accountFrom") String accountFrom, 
 		  @RequestParam(value="accountTo") String accountTo, 
@@ -83,7 +72,7 @@ public class AccountsController implements NotificationService {
 	  try {
 		  accountsService.transferBetween(accountFrom, accountTo, amount);
           
-		    } catch (DuplicateAccountIdException daie) {
+		    } catch (BankTransactionException daie) {
 		      return new ResponseEntity<>(daie.getMessage(), HttpStatus.BAD_REQUEST);
 		    }
 
