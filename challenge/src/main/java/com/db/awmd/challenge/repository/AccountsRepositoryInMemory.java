@@ -70,7 +70,9 @@ public class AccountsRepositoryInMemory implements AccountsRepository {
 		else if((amount.compareTo(account.getBalance()) == 1)) {
 			throw new BankTransactionException("Insuffcient balance");
 		}
-		
+		else if(amount.signum()== -1) {
+			throw new BankTransactionException("Negative amount not allowed");	
+		}
 		else {
 			newBalance = account.getBalance().subtract(amount);
 		}
